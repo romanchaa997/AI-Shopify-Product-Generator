@@ -1,0 +1,7 @@
+{
+  "name": "AI Shopify Product Generator",
+  "description": "An AI-powered tool to generate complete Shopify product listings from brief ideas, including descriptions, pricing, tags, and mockup images.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
