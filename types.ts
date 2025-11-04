@@ -23,4 +23,6 @@ export interface CryptoAsset {
   name: string;
   symbol: string;
   pqcStatus: 'Migrated' | 'Pending' | 'Vulnerable';
+  algorithm: string;
+  isCritical?: boolean;
 }

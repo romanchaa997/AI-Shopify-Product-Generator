@@ -3,21 +3,21 @@ import { generateProductListing } from './services/geminiService';
 import type { ProductIdea, GeneratedProduct } from './types';
 import { ProductSelection } from './components/AspectRatioSelector';
 import { ResultView } from './components/FullScreenView';
-import { Loader } from './components/Loader';
 import { SavedProductsView } from './components/SavedProductsView';
 import { PQCReadinessView } from './components/PQCReadinessView';
 import { Icon } from './components/Icon';
 import { AuthControls } from './components/AuthControls';
 
-type ViewState = 'list' | 'loading' | 'result' | 'saved' | 'pqc';
+type ViewState = 'list' | 'result' | 'saved' | 'pqc';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('list');
   const [generatedProduct, setGeneratedProduct] = useState<GeneratedProduct | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = useCallback(async (idea: ProductIdea) => {
-    setView('loading');
+    setIsGenerating(true);
     setError(null);
     setGeneratedProduct(null);
 
@@ -28,6 +28,8 @@ const App: React.FC = () => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
       setView('list'); // Go back to list on error
+    } finally {
+      setIsGenerating(false);
     }
   }, []);
 
@@ -43,8 +45,6 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (view) {
-      case 'loading':
-        return <Loader />;
       case 'result':
         return generatedProduct && <ResultView product={generatedProduct} onBack={handleBackToList} />;
       case 'saved':
@@ -53,7 +53,7 @@ const App: React.FC = () => {
         return <PQCReadinessView onBack={handleBackToList} />;
       case 'list':
       default:
-        return <ProductSelection onSelectProduct={handleGenerate} />;
+        return <ProductSelection onSelectProduct={handleGenerate} isGenerating={isGenerating} />;
     }
   };
 
@@ -87,7 +87,7 @@ const App: React.FC = () => {
       </header>
 
       <main className="flex-grow container mx-auto px-4 py-8 md:py-12 flex flex-col items-center justify-center">
-        {error && (
+        {error && !isGenerating && (
             <div className="w-full max-w-4xl mx-auto mb-4 text-center text-red-400 bg-red-900 bg-opacity-50 p-3 rounded-lg">
                 <p><strong>Generation Failed:</strong> {error}</p>
                 <p>Please try again. If the problem persists, check the console for more details.</p>

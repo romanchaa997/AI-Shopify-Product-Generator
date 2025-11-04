@@ -4,22 +4,24 @@ import type { ProductIdea } from '../types';
 import { ProductCard } from './ImageGrid';
 import { Icon } from './Icon';
 import { generateImagePrompt } from '../services/geminiService';
+import { ProgressBar } from './ProgressBar';
 
 interface ProductSelectionProps {
   onSelectProduct: (idea: ProductIdea) => void;
+  isGenerating: boolean;
 }
 
-export const ProductSelection: React.FC<ProductSelectionProps> = ({ onSelectProduct }) => {
+export const ProductSelection: React.FC<ProductSelectionProps> = ({ onSelectProduct, isGenerating }) => {
     const [customName, setCustomName] = useState('');
     const [customDescription, setCustomDescription] = useState('');
-    const [isGenerating, setIsGenerating] = useState(false);
+    const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handleCustomSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!customName.trim() || !customDescription.trim()) return;
 
-        setIsGenerating(true);
+        setIsGeneratingPrompt(true);
         setError(null);
         try {
           const imagePrompt = await generateImagePrompt(customName, customDescription);
@@ -33,9 +35,13 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({ onSelectProd
         } catch (err) {
             console.error("Failed to generate image prompt:", err);
             setError(err instanceof Error ? err.message : 'Could not generate an idea. Please try again.');
-            setIsGenerating(false);
+            setIsGeneratingPrompt(false);
         }
     };
+
+    if (isGenerating) {
+        return <ProgressBar />;
+    }
 
     return (
         <div className="w-full max-w-4xl mx-auto">
@@ -58,7 +64,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({ onSelectProd
                                 placeholder="e.g., Audityzer PRO"
                                 className="w-full bg-gray-900 border border-gray-700 text-white rounded-md px-3 py-2 focus:ring-cyan-500 focus:border-cyan-500"
                                 required
-                                disabled={isGenerating}
+                                disabled={isGeneratingPrompt}
                             />
                         </div>
                         <div>
@@ -71,13 +77,13 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({ onSelectProd
                                 className="w-full bg-gray-900 border border-gray-700 text-white rounded-md px-3 py-2 focus:ring-cyan-500 focus:border-cyan-500"
                                 rows={3}
                                 required
-                                disabled={isGenerating}
+                                disabled={isGeneratingPrompt}
                              />
                         </div>
                          <div>
-                             <button type="submit" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-cyan-600 text-white font-semibold rounded-lg shadow-md hover:bg-cyan-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled={isGenerating}>
+                             <button type="submit" className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-cyan-600 text-white font-semibold rounded-lg shadow-md hover:bg-cyan-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled={isGeneratingPrompt}>
                                 <Icon name="sparkles" className="w-5 h-5" />
-                                {isGenerating ? 'Generating Idea...' : 'Generate Listing'}
+                                {isGeneratingPrompt ? 'Generating Idea...' : 'Generate Listing'}
                             </button>
                          </div>
                     </div>
