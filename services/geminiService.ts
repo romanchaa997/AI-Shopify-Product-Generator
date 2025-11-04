@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI, Type, Modality, GenerateContentResponse } from "@google/genai";
 import type { ProductIdea, GeneratedProduct } from '../types';
 
@@ -24,6 +25,27 @@ const productSchema = {
   },
   required: ['productName', 'productType', 'shortDescription', 'longDescription', 'suggestedPrice', 'tags']
 };
+
+export async function generateImagePrompt(name: string, description: string): Promise<string> {
+  const prompt = `You are an expert in creative direction for digital products. Based on the product name and description, create a concise, effective, and visually descriptive image prompt for an AI image generator (like Imagen or Midjourney). 
+  The prompt should result in a clean, modern, professional image suitable for a tech-savvy audience, like a logo, icon, or illustration.
+  Do not include any explanatory text, labels, or quotation marks. Output only the prompt itself.
+
+  Product Name: "${name}"
+  Product Description: "${description}"`;
+
+  try {
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+    });
+
+    return response.text.trim();
+  } catch (error) {
+    console.error("Error generating image prompt:", error);
+    throw new Error("The AI failed to create a concept for the product image.");
+  }
+}
 
 async function generateProductText(idea: ProductIdea): Promise<Omit<GeneratedProduct, 'imageUrl' | 'marketContext' | 'sources'>> {
   const prompt = `

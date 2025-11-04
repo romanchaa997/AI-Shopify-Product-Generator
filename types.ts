@@ -17,3 +17,10 @@ export interface GeneratedProduct {
   marketContext: string;
   sources: Array<{ uri: string; title: string; }>;
 }
+
+export interface CryptoAsset {
+  id: string;
+  name: string;
+  symbol: string;
+  pqcStatus: 'Migrated' | 'Pending' | 'Vulnerable';
+}

@@ -1,13 +1,15 @@
 import React, { useState, useCallback } from 'react';
 import { generateProductListing } from './services/geminiService';
 import type { ProductIdea, GeneratedProduct } from './types';
-import { ProductList } from './components/AspectRatioSelector';
+import { ProductSelection } from './components/AspectRatioSelector';
 import { ResultView } from './components/FullScreenView';
 import { Loader } from './components/Loader';
 import { SavedProductsView } from './components/SavedProductsView';
+import { PQCReadinessView } from './components/PQCReadinessView';
 import { Icon } from './components/Icon';
+import { AuthControls } from './components/AuthControls';
 
-type ViewState = 'list' | 'loading' | 'result' | 'saved';
+type ViewState = 'list' | 'loading' | 'result' | 'saved' | 'pqc';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>('list');
@@ -47,23 +49,19 @@ const App: React.FC = () => {
         return generatedProduct && <ResultView product={generatedProduct} onBack={handleBackToList} />;
       case 'saved':
         return <SavedProductsView onBack={handleBackToList} />;
+      case 'pqc':
+        return <PQCReadinessView onBack={handleBackToList} />;
       case 'list':
       default:
-        return <ProductList onSelectProduct={handleGenerate} />;
+        return <ProductSelection onSelectProduct={handleGenerate} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
        <header className="text-center p-4 border-b border-gray-800 shadow-md bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10 flex justify-between items-center">
-        <div className="flex-1 text-left">
-          {/* Placeholder for left-side actions */}
-        </div>
-        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
-          AI Shopify Product Generator
-        </h1>
-        <div className="flex-1 text-right">
-            <button 
+        <div className="flex-1 text-left flex items-center gap-2">
+           <button 
                 onClick={handleViewSaved}
                 className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-700/50 text-gray-300 font-semibold rounded-lg shadow-sm hover:bg-gray-700 transition-all duration-200"
                 title="View Saved Products"
@@ -71,6 +69,20 @@ const App: React.FC = () => {
                 <Icon name="archive" className="w-5 h-5" />
                 <span className="hidden sm:inline">Saved</span>
             </button>
+            <button 
+                onClick={() => setView('pqc')}
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-700/50 text-gray-300 font-semibold rounded-lg shadow-sm hover:bg-gray-700 transition-all duration-200"
+                title="View PQC Readiness Audit"
+            >
+                <Icon name="shield-check" className="w-5 h-5" />
+                <span className="hidden sm:inline">PQC Audit</span>
+            </button>
+        </div>
+        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+          AI Shopify Product Generator
+        </h1>
+        <div className="flex-1 text-right">
+            <AuthControls />
         </div>
       </header>
 
